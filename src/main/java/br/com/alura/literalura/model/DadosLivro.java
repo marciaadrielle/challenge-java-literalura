@@ -11,6 +11,6 @@ public record DadosLivro(@JsonAlias("id") Integer id,
                          @JsonAlias("title") String titulo,
                          @JsonAlias("authors") List<DadosAutor> autores,
                          @JsonAlias("languages") List<String> idiomas,
-                         @JsonAlias("summary") List<String> resumos)
+                         @JsonAlias("summaries") List<String> resumos)
                          {
 }
