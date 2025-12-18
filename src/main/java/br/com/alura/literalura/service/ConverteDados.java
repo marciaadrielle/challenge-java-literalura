@@ -1,6 +1,5 @@
 package br.com.alura.literalura.service;
 
-import br.com.alura.literalura.repository.IConverteDados;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
