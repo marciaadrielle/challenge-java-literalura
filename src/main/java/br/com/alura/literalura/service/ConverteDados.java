@@ -11,7 +11,7 @@ public class ConverteDados implements IConverteDados {
         try {
             return mapper.readValue(json, classe);
         } catch (JacksonException e) {
-            throw new RuntimeException("Erro ao converter JSON para " + classe.getSimpleName(), e);
+            throw new RuntimeException(e);
         }
     }
 }
