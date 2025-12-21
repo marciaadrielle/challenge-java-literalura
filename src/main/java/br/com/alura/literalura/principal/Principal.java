@@ -9,10 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -42,7 +39,7 @@ public class Principal {
                     1 - Buscar livros por título
                     2 - Listar livros registrados
                     3 - Listar autores registrados
-                    4 - Lisar autores vivos em determinado ano
+                    4 - Listar autores vivos em determinado ano
                     5 - Buscar livros por idioma
                     
                     0 - Sair
@@ -90,7 +87,7 @@ public class Principal {
 
             System.out.println("Livros encontrados: ");
             resposta.results().stream()
-                    .limit(5) // exibe apenas os 10 primeiros
+                    .limit(5) // exibe apenas os 5 primeiros
                     .forEach(dados -> {
                         String autores = (dados.autores() != null && !dados.autores().isEmpty())
                                 ? dados.autores().stream()
@@ -107,7 +104,7 @@ public class Principal {
             // Usuário escolhe o ID
             System.out.println("Digite o ID do livro que deseja salvar: ");
             long idEscolhido = leitura.nextLong();
-            leitura.nextLine();
+            leitura.nextLine(); // consumir quebra de linha
 
             // Busca o livro correspondente
             DadosLivro escolhido = resposta.results().stream()
@@ -123,22 +120,45 @@ public class Principal {
             Optional<Livro> livroCadastrado = livroRepository.findByIdGutendex(escolhido.id());
 
             if (livroCadastrado.isPresent()) {
-                System.out.println("Livro já cadastrado: " + livroCadastrado.get().getTitulo());
+                System.out.println("➡ Livro já cadastrado: " + livroCadastrado.get().getTitulo());
             } else {
+                // Cria o livro
                 Livro livro = new Livro(escolhido);
-                livro.getAutores().forEach(a -> a.setLivro(livro));
+
+                // Corrige autores: reutiliza se já existir no banco
+                Set<Autor> autoresCorrigidos = new HashSet<>();
+                for (Autor autor : livro.getAutores()) {
+                    Optional<Autor> existente = autorRepository.findByNomeAndAnoNascimentoAndAnoFalecimento(
+                            autor.getNome(),
+                            autor.getAnoNascimento(),
+                            autor.getAnoFalecimento()
+                    );
+
+                    if (existente.isPresent()) {
+                        autoresCorrigidos.add(existente.get()); // reutiliza autor já salvo
+                    } else {
+                        autor.setLivro(livro);
+                        autoresCorrigidos.add(autor); // novo autor
+                    }
+                }
+
+                livro.setAutores(autoresCorrigidos);
                 livroRepository.save(livro);
 
-                String autor = livro.getAutores().isEmpty()
-                        ? "Autor desconhecido" : livro.getAutores().iterator().next().getNome();
+                // Exibe informações do livro salvo
+                String autores = livro.getAutores().isEmpty()
+                        ? "Autor desconhecido"
+                        : livro.getAutores().stream()
+                        .map(Autor::getNome)
+                        .collect(Collectors.joining(", "));
 
                 String idioma = escolhido.idiomas() != null && !escolhido.idiomas().isEmpty()
                         ? escolhido.idiomas().get(0)
                         : "Idioma não informado";
 
-                System.out.printf("Livro salvo: %s | Autor: %s | Idioma: %s | Downloads: %d%n",
+                System.out.printf("Livro salvo: %s | Autores: %s | Idioma: %s | Downloads: %d%n",
                         escolhido.titulo(),
-                        autor,
+                        autores,
                         livro.getIdioma().getDescricao(),
                         escolhido.downloads() != null ? escolhido.downloads() : 0);
             }
@@ -146,6 +166,7 @@ public class Principal {
             System.out.println("Livro não encontrado");
         }
     }
+
 
 
     private void listarLivrosRegistrados() {
@@ -189,10 +210,64 @@ public class Principal {
 
 
     private void listarAutoresVivosAno() {
+        System.out.println("Digite o ano que deseja verificar: ");
+        int ano = leitura.nextInt();
+        leitura.nextLine();
+
+        List<Autor> autores = autorRepository.findAll();
+
+        List<Autor> vivos = autores.stream()
+                .filter(a -> a.getAnoNascimento() != null && a.getAnoNascimento() <= ano)
+                .filter(a -> a.getAnoFalecimento() == null || a.getAnoFalecimento() > ano)
+                .toList();
+
+        if (vivos.isEmpty()) {
+            System.out.println("Nenhum autor vivo encontrado nesse ano.");
+        } else {
+            System.out.println("Autores vivos em " + ano + ":");
+            vivos.forEach(a -> System.out.printf("- %s (Nascimento: %s, Falecimento: %s)%n",
+                    a.getNome(),
+                    a.getAnoNascimento() != null ? a.getAnoNascimento() : "Desconhecido",
+                    a.getAnoFalecimento() != null ? a.getAnoFalecimento() : "Ainda vivo"));
+        }
     }
 
+
     private void buscarLivrosPorIdioma() {
+        System.out.println("Digite o idioma (ex: en, pt, fr, es): ");
+        String sigla = leitura.nextLine().trim();
+
+        Idioma idioma;
+        try {
+            idioma = Idioma.fromString(sigla);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Idioma inválido.");
+            return;
+        }
+
+        List<Livro> livros = livroRepository.findAll()
+                .stream()
+                .filter(l -> l.getIdioma() == idioma)
+                .toList();
+
+        if (livros.isEmpty()) {
+            System.out.println("Nenhum livro encontrado para o idioma " + idioma.getDescricao());
+        } else {
+            System.out.println("Livros em " + idioma.getDescricao() + ":");
+            livros.forEach(l -> {
+                String autores = l.getAutores().isEmpty()
+                        ? "Autor desconhecido"
+                        : l.getAutores().stream()
+                        .map(Autor::getNome)
+                        .collect(Collectors.joining(", "));
+                System.out.printf("- %s | Autores: %s | Downloads: %d%n",
+                        l.getTitulo(),
+                        autores,
+                        l.getDownloads() != null ? l.getDownloads() : 0);
+            });
+        }
     }
+
 
 
 }
