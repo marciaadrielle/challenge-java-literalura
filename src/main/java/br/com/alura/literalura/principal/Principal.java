@@ -71,21 +71,60 @@ public class Principal {
     private void buscarLivroPorTitulo() {
         System.out.println("Digite o nome do livro que deseja buscar: ");
         var nomeLivro = leitura.nextLine();
-        var json = consumo.obterDados(ENDERECO + nomeLivro.replace(" ","%20").toLowerCase());
+        var json = consumo.obterDados(ENDERECO + nomeLivro.replace(" ", "%20").toLowerCase());
         var resposta = conversor.obterDados(json, GutendexResponse.class);
 
-        if (resposta.results() != null && !resposta.results().isEmpty()){
-        DadosLivro dados = resposta.results().get(0);
-        System.out.println(dados);
+        if (resposta.results() != null && !resposta.results().isEmpty()) {
+            DadosLivro dados = resposta.results().get(0);
+
+            livrosBuscados.add(dados);
+
+            // Pega o primeiro autor (se existir)
+            String autor = dados.autores() != null && !dados.autores().isEmpty()
+                    ? dados.autores().get(0).nome()
+                    : "Autor desconhecido";
+
+            // Pega o idioma (primeiro da lista)
+            String idioma = dados.idiomas() != null && !dados.idiomas().isEmpty()
+                    ? dados.idiomas().get(0)
+                    : "Idioma não informado";
+
+            // Mostra os dados completos
+            System.out.printf("Livro encontrado: %s | Autor: %s | Idioma: %s | Downloads: %d%n",
+                    dados.titulo(),
+                    autor,
+                    idioma,
+                    dados.downloads() != null ? dados.downloads() : 0);
         } else {
             System.out.println("Livro não encontrado");
         }
-
-
     }
 
-    private void listarLivrosRegistrados() {
+        private void listarLivrosRegistrados() {
+        if (livrosBuscados.isEmpty()) {
+            System.out.println("Nenhum livro registrado ainda.");
+        } else {
+            System.out.println("Livros registrados:");
+            for (DadosLivro livro : livrosBuscados) {
+                // Pega o primeiro autor (se existir)
+                String autor = livro.autores() != null && !livro.autores().isEmpty()
+                        ? livro.autores().get(0).nome()
+                        : "Autor desconhecido";
+
+                // Pega o idioma (primeiro da lista)
+                String idioma = livro.idiomas() != null && !livro.idiomas().isEmpty()
+                        ? livro.idiomas().get(0)
+                        : "Idioma não informado";
+
+                System.out.printf("- %s | Autor: %s | Idioma: %s | Downloads: %d%n",
+                        livro.titulo(),
+                        autor,
+                        idioma,
+                        livro.downloads() != null ? livro.downloads() : 0);
+            }
+        }
     }
+
 
     private void listarAutoresRegistrados() {
     }
