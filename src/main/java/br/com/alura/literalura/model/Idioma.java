@@ -4,40 +4,40 @@ public enum Idioma {
 
     PT("pt", "Português"),
     FR("fr", "Francês"),
-    EN("en", "InglÊs"),
+    EN("en", "Inglês"),
     ES("es", "Espanhol");
-    private String idiomaGutendex;
-    private String idioma;
 
-    Idioma(String idiomaGutendex, String idioma) {
-        this.idiomaGutendex = idiomaGutendex;
-        this.idioma = idioma;
+    private final String codigoGutendex;
+    private final String descricao;
+
+    Idioma(String codigoGutendex, String descricao) {
+        this.codigoGutendex = codigoGutendex;
+        this.descricao = descricao;
     }
 
     public static Idioma fromString(String text) {
         for (Idioma idioma : Idioma.values()) {
-            if (idioma.idiomaGutendex.equalsIgnoreCase(text)) {
+            if (idioma.codigoGutendex.equalsIgnoreCase(text)) {
                 return idioma;
             }
         }
         throw new IllegalArgumentException("Idioma não encontrado: " + text);
     }
 
-    public static Idioma fromEspanol(String text) {
+    public static Idioma fromDescricao(String text) {
         for (Idioma idioma : Idioma.values()) {
-            if (idioma.idioma.equalsIgnoreCase(text)) {
+            if (idioma.descricao.equalsIgnoreCase(text)) {
                 return idioma;
             }
         }
-        throw new IllegalArgumentException("Idioama não encontrado " + text);
+        throw new IllegalArgumentException("Idioma não encontrado: " + text);
     }
 
-    public String getIdiomaGutendex() {
-        return idiomaGutendex;
+    public String getCodigoGutendex() {
+        return codigoGutendex;
     }
 
-    public String getIdiomaEspanol() {
-        return idioma;
+    public String getDescricao() {
+        return descricao;
     }
-
 }

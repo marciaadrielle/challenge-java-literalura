@@ -1,9 +1,13 @@
 package br.com.alura.literalura.principal;
 
+import br.com.alura.literalura.model.Autor;
 import br.com.alura.literalura.model.DadosLivro;
 import br.com.alura.literalura.model.GutendexResponse;
+import br.com.alura.literalura.model.Livro;
+import br.com.alura.literalura.repository.*;
 import br.com.alura.literalura.service.ConsumoApi;
 import br.com.alura.literalura.service.ConverteDados;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -12,6 +16,12 @@ import java.util.Scanner;
 
 @Component
 public class Principal {
+    @Autowired
+    private LivroRepository livroRepository;
+
+    @Autowired
+    private AutorRepository autorRepository;
+
     private ConsumoApi consumo = new ConsumoApi();
     private ConverteDados conversor = new ConverteDados();
     private Scanner leitura = new Scanner(System.in);
@@ -77,7 +87,9 @@ public class Principal {
         if (resposta.results() != null && !resposta.results().isEmpty()) {
             DadosLivro dados = resposta.results().get(0);
 
-            livrosBuscados.add(dados);
+            Livro livro = new Livro(dados);
+            livro.getAutores().forEach(a -> a.setLivro(livro));
+            livroRepository.save(livro);
 
             // Pega o primeiro autor (se existir)
             String autor = dados.autores() != null && !dados.autores().isEmpty()
@@ -101,33 +113,44 @@ public class Principal {
     }
 
         private void listarLivrosRegistrados() {
-        if (livrosBuscados.isEmpty()) {
+        List<Livro> livros = livroRepository.findAll();
+
+
+        if (livros.isEmpty()) {
             System.out.println("Nenhum livro registrado ainda.");
         } else {
             System.out.println("Livros registrados:");
-            for (DadosLivro livro : livrosBuscados) {
-                // Pega o primeiro autor (se existir)
-                String autor = livro.autores() != null && !livro.autores().isEmpty()
-                        ? livro.autores().get(0).nome()
-                        : "Autor desconhecido";
-
-                // Pega o idioma (primeiro da lista)
-                String idioma = livro.idiomas() != null && !livro.idiomas().isEmpty()
-                        ? livro.idiomas().get(0)
-                        : "Idioma não informado";
+            for (Livro livro : livros) {
+                String autor = livro.getAutores().isEmpty()
+                        ? "Autor Desconhecido"
+                        : livro.getAutores().get(0).getNome();
 
                 System.out.printf("- %s | Autor: %s | Idioma: %s | Downloads: %d%n",
-                        livro.titulo(),
+                        livro.getTitulo(),
                         autor,
-                        idioma,
-                        livro.downloads() != null ? livro.downloads() : 0);
+                        livro.getIdioma().getDescricao(),
+                        livro.getDownloads() != null ? livro.getDownloads() : 0);
             }
         }
     }
 
 
     private void listarAutoresRegistrados() {
+        List<Autor> autores = autorRepository.findAll();
+
+        if (autores.isEmpty()) {
+            System.out.println("Nenhum autor registrado ainda.");
+        } else {
+            System.out.println("Autores cadastrados:");
+            for (Autor autor : autores) {
+                System.out.printf("- %s | Nascimento: %s | Falecimento: %s%n",
+                        autor.getNome(),
+                        autor.getAnoNascimento() != null ? autor.getAnoNascimento() : "Desconhecido",
+                        autor.getAnoFalecimento() != null ? autor.getAnoFalecimento() : "Ainda vivo");
+            }
+        }
     }
+
 
     private void listarAutoresVivosAno() {
     }
