@@ -2,7 +2,10 @@ package br.com.alura.literalura.service;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public class ConverteDados implements IConverteDados {
     private final ObjectMapper mapper = new ObjectMapper();
 

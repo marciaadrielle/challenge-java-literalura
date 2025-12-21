@@ -1,5 +1,6 @@
 package br.com.alura.literalura.model;
 
+import br.com.alura.literalura.model.dto.DadosAutor;
 import jakarta.persistence.*;
 
 import java.util.Objects;
