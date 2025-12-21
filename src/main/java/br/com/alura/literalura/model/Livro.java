@@ -3,19 +3,21 @@ package br.com.alura.literalura.model;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "livros")
 public class Livro {
     @Id
     private Long idGutendex;
-    /*@GeneratedValue(strategy = GenerationType.IDENTITY)*/
-    private Long id;
+
     private  String titulo;
 
     @OneToMany(mappedBy = "livro", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Autor> autores;
+    private Set<Autor> autores = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     private Idioma idioma;
@@ -29,7 +31,7 @@ public class Livro {
         this.autores = dadosLivro.autores()
                 .stream()
                 .map(Autor::new)
-                .toList();
+                .collect(Collectors.toSet());
         this.autores.forEach(a -> a.setLivro(this));
 
         this.idioma = Idioma.fromString(dadosLivro.idiomas().get(0));
@@ -44,14 +46,6 @@ public class Livro {
         this.idGutendex = idGutendex;
     }
 
-/*    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }*/
-
     public String getTitulo() {
         return titulo;
     }
@@ -60,11 +54,11 @@ public class Livro {
         this.titulo = titulo;
     }
 
-    public List<Autor> getAutores() {
+    public Set<Autor> getAutores() {
         return autores;
     }
 
-    public void setAutores(List<Autor> autores) {
+    public void setAutores(Set<Autor> autores) {
         this.autores = autores;
     }
 

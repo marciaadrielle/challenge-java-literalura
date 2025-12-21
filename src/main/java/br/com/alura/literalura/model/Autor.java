@@ -2,6 +2,8 @@ package br.com.alura.literalura.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 
 @Entity
 @Table(name = "autores")
@@ -17,16 +19,25 @@ public class Autor {
 
     // Relacionamento com Livro
     @ManyToOne
-    @JoinColumn(name = "livro_id") // cria a FK na tabela autores
+    @JoinColumn(name = "livro_id")
     private Livro livro;
 
     public Autor() {}
 
     public Autor(DadosAutor dadosAutor) {
-        this.nome = dadosAutor.nome();
+        this.nome = formatarNomeAutor(dadosAutor.nome());
         this.anoNascimento = dadosAutor.anoNascimento();
         this.anoFalecimento = dadosAutor.anoFalecimento();
     }
+
+    private String formatarNomeAutor(String nome) {
+        if (nome != null && nome.contains(",")) {
+            String[] partes = nome.split(",");
+            return partes[1].trim() + " " + partes[0].trim();
+        }
+        return nome;
+    }
+
 
     // getters e setters
     public Long getId() { return id; }
@@ -43,4 +54,20 @@ public class Autor {
 
     public Livro getLivro() { return livro; }
     public void setLivro(Livro livro) { this.livro = livro; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Autor)) return false;
+        Autor autor = (Autor) o;
+        return Objects.equals(nome, autor.nome) &&
+                Objects.equals(anoNascimento, autor.anoNascimento) &&
+                Objects.equals(anoFalecimento, autor.anoFalecimento);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nome, anoNascimento, anoFalecimento);
+    }
+
 }
