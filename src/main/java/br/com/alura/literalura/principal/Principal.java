@@ -1,18 +1,19 @@
 package br.com.alura.literalura.principal;
 
-import br.com.alura.literalura.model.Autor;
-import br.com.alura.literalura.model.DadosLivro;
-import br.com.alura.literalura.model.GutendexResponse;
-import br.com.alura.literalura.model.Livro;
+import br.com.alura.literalura.model.*;
 import br.com.alura.literalura.repository.*;
 import br.com.alura.literalura.service.ConsumoApi;
 import br.com.alura.literalura.service.ConverteDados;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 @Component
 public class Principal {
@@ -80,39 +81,77 @@ public class Principal {
 
     private void buscarLivroPorTitulo() {
         System.out.println("Digite o nome do livro que deseja buscar: ");
-        var nomeLivro = leitura.nextLine();
-        var json = consumo.obterDados(ENDERECO + nomeLivro.replace(" ", "%20").toLowerCase());
+        var nomeLivro = URLEncoder.encode(leitura.nextLine(), StandardCharsets.UTF_8);
+
+        var json = consumo.obterDados(ENDERECO + nomeLivro);
         var resposta = conversor.obterDados(json, GutendexResponse.class);
 
         if (resposta.results() != null && !resposta.results().isEmpty()) {
-            DadosLivro dados = resposta.results().get(0);
 
-            Livro livro = new Livro(dados);
-            livro.getAutores().forEach(a -> a.setLivro(livro));
-            livroRepository.save(livro);
+            System.out.println("Livros encontrados (máx. 10):");
+            resposta.results().stream()
+                    .limit(5) // exibe apenas os 10 primeiros
+                    .forEach(dados -> {
+                        String autores = (dados.autores() != null && !dados.autores().isEmpty())
+                                ? dados.autores().stream()
+                                .map(DadosAutor::nome)
+                                .collect(Collectors.joining(", "))
+                                : "Autor desconhecido";
 
-            // Pega o primeiro autor (se existir)
-            String autor = dados.autores() != null && !dados.autores().isEmpty()
-                    ? dados.autores().get(0).nome()
-                    : "Autor desconhecido";
+                        System.out.printf("ID: %d | Título: %s | Autores: %s%n",
+                                dados.id(),
+                                dados.titulo(),
+                                autores);
+                    });
 
-            // Pega o idioma (primeiro da lista)
-            String idioma = dados.idiomas() != null && !dados.idiomas().isEmpty()
-                    ? dados.idiomas().get(0)
-                    : "Idioma não informado";
+            // Usuário escolhe o ID
+            System.out.println("Digite o ID do livro que deseja salvar: ");
+            long idEscolhido = leitura.nextLong();
+            leitura.nextLine(); // consumir quebra de linha
 
-            // Mostra os dados completos
-            System.out.printf("Livro encontrado: %s | Autor: %s | Idioma: %s | Downloads: %d%n",
-                    dados.titulo(),
-                    autor,
-                    idioma,
-                    dados.downloads() != null ? dados.downloads() : 0);
+            // Busca o livro correspondente
+            DadosLivro escolhido = resposta.results().stream()
+                    .filter(d -> d.id() == idEscolhido)
+                    .findFirst()
+                    .orElse(null);
+
+            if (escolhido == null) {
+                System.out.println("ID inválido. Nenhum livro salvo.");
+                return;
+            }
+
+            Optional<Livro> livroCadastrado = livroRepository.findByIdGutendex(escolhido.id());
+
+            if (livroCadastrado.isPresent()) {
+                System.out.println("➡ Livro já cadastrado: " + livroCadastrado.get().getTitulo());
+            } else {
+                Livro livro = new Livro(escolhido);
+                livro.getAutores().forEach(a -> a.setLivro(livro));
+                livroRepository.save(livro);
+
+                String autor = escolhido.autores() != null && !escolhido.autores().isEmpty()
+                        ? escolhido.autores().get(0).nome()
+                        : "Autor desconhecido";
+
+                String idioma = escolhido.idiomas() != null && !escolhido.idiomas().isEmpty()
+                        ? escolhido.idiomas().get(0)
+                        : "Idioma não informado";
+
+                System.out.printf("Livro salvo: %s | Autor: %s | Idioma: %s | Downloads: %d%n",
+                        escolhido.titulo(),
+                        autor,
+                        idioma,
+                        escolhido.downloads() != null ? escolhido.downloads() : 0);
+            }
         } else {
             System.out.println("Livro não encontrado");
         }
     }
 
-        private void listarLivrosRegistrados() {
+
+
+
+    private void listarLivrosRegistrados() {
         List<Livro> livros = livroRepository.findAll();
 
 

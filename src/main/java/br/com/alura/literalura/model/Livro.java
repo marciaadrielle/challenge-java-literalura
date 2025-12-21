@@ -9,7 +9,8 @@ import java.util.List;
 @Table(name = "livros")
 public class Livro {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idGutendex;
+    /*@GeneratedValue(strategy = GenerationType.IDENTITY)*/
     private Long id;
     private  String titulo;
 
@@ -23,23 +24,33 @@ public class Livro {
     public Livro(){}
 
     public Livro (DadosLivro dadosLivro){
+        this.idGutendex = dadosLivro.id();
         this.titulo = dadosLivro.titulo();
         this.autores = dadosLivro.autores()
                 .stream()
                 .map(Autor::new)
                 .toList();
+        this.autores.forEach(a -> a.setLivro(this));
 
         this.idioma = Idioma.fromString(dadosLivro.idiomas().get(0));
         this.downloads = dadosLivro.downloads();
     }
 
-    public Long getId() {
+    public Long getIdGutendex() {
+        return idGutendex;
+    }
+
+    public void setIdGutendex(Long idGutendex) {
+        this.idGutendex = idGutendex;
+    }
+
+/*    public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
+    }*/
 
     public String getTitulo() {
         return titulo;
