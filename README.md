@@ -24,7 +24,8 @@ Este projeto foi desenvolvido com foco no aprimoramento das seguintes competênc
 A aplicação disponibiliza um menu interativo no terminal com as seguintes opções:
 
 
-<img width="386" height="269" alt="image" src="https://github.com/user-attachments/assets/44518c9c-8695-4e4d-9b23-b4d0e7835e64" />
+<img width="744" height="518" alt="image" src="https://github.com/user-attachments/assets/f5935900-62d5-48b8-b303-c2dda20863c5" />
+
 
 1. **Buscar livros por título**
    - Consulta a API Gutendex
