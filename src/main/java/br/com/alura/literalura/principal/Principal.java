@@ -40,8 +40,13 @@ public class Principal {
                     0 - Sair
                     
                     """);
-
             System.out.println(menu);
+            System.out.print("Escolha uma opção: ");
+            while (!leitura.hasNextInt()) {
+                System.out.print("Digite um número válido: ");
+                leitura.next();
+            }
+
             opcao = leitura.nextInt();
             leitura.nextLine();
 
