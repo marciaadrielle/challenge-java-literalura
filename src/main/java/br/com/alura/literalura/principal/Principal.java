@@ -131,12 +131,23 @@ public class Principal {
             return;
         }
 
-        autores.forEach(a -> System.out.printf(
-                "- %s | Nascimento: %s | Falecimento: %s%n",
-                a.getNome(),
-                a.getAnoNascimento() != null ? a.getAnoNascimento() : "Desconhecido",
-                a.getAnoFalecimento() != null ? a.getAnoFalecimento() : "Ainda vivo"
-        ));
+        autores.forEach(a -> {
+            System.out.printf(
+                    "%n- %s | Nascimento: %s | Falecimento: %s%n",
+                    a.getNome(),
+                    a.getAnoNascimento() != null ? a.getAnoNascimento() : "Desconhecido",
+                    a.getAnoFalecimento() != null ? a.getAnoFalecimento() : "Ainda vivo"
+            );
+
+            if (a.getLivros().isEmpty()) {
+                System.out.println("  Livros: nenhum cadastrado");
+            } else {
+                System.out.println("  Livros:");
+                a.getLivros().forEach(l ->
+                        System.out.println("   • " + l.getTitulo())
+                );
+            }
+        });
     }
 
 

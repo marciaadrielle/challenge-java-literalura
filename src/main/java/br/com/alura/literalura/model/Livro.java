@@ -10,14 +10,19 @@ import java.util.Set;
 public class Livro {
 
     @Id
+
     private Long idGutendex;
 
     private String titulo;
 
-    @OneToMany(
-            mappedBy = "livro",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY
+    @ManyToMany(
+            fetch = FetchType.EAGER,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE }
+    )
+    @JoinTable(
+            name = "livro_autor",
+            joinColumns = @JoinColumn(name = "livro_id"),
+            inverseJoinColumns = @JoinColumn(name = "autor_id")
     )
     private Set<Autor> autores = new HashSet<>();
 

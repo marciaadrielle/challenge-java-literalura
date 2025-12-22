@@ -16,7 +16,7 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
     /* ================= LISTAR LIVROS COM AUTORES ================= */
 
     @Query("""
-        SELECT DISTINCT l
+        SELECT DISTINCT l e 
         FROM Livro l
         LEFT JOIN FETCH l.autores
     """)

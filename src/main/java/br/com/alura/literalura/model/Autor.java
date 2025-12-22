@@ -3,7 +3,9 @@ package br.com.alura.literalura.model;
 import br.com.alura.literalura.model.dto.DadosAutor;
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 
 @Entity
@@ -19,9 +21,9 @@ public class Autor {
     private Integer anoFalecimento;
 
     // Relacionamento com Livro
-    @ManyToOne
-    @JoinColumn(name = "livro_id")
-    private Livro livro;
+    @ManyToMany(mappedBy = "autores", fetch = FetchType.EAGER)
+    private Set<Livro> livros = new HashSet<>();
+
 
     public Autor() {}
 
@@ -53,8 +55,14 @@ public class Autor {
     public Integer getAnoFalecimento() { return anoFalecimento; }
     public void setAnoFalecimento(Integer anoFalecimento) { this.anoFalecimento = anoFalecimento; }
 
-    public Livro getLivro() { return livro; }
-    public void setLivro(Livro livro) { this.livro = livro; }
+    public Set<Livro> getLivros() {
+        return livros;
+    }
+
+    public void setLivros(Set<Livro> livros) {
+        this.livros = livros;
+    }
+
 
     @Override
     public boolean equals(Object o) {

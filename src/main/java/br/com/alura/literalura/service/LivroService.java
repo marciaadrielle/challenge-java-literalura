@@ -80,7 +80,7 @@ public class LivroService {
     }
 
     public List<Autor> listarAutoresRegistrados() {
-        return autorRepository.findAll();
+        return autorRepository.buscarAutoresComLivros();
     }
 
     public List<Autor> listarAutoresVivosNoAno(int ano) {
@@ -127,7 +127,7 @@ public class LivroService {
                             return novo;
                         });
 
-                autor.setLivro(livro);
+                autor.getLivros().add(livro);
                 autores.add(autor);
             }
         }
