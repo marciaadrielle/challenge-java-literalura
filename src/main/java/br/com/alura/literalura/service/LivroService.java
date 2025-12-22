@@ -36,7 +36,7 @@ public class LivroService {
 
     /* ================= BUSCAR NA API ================= */
 
-    public List<DadosLivro> buscarLivros(String titulo) {
+    public List<DadosLivro> buscarLivrosPorTitulo(String titulo) {
         String tituloCodificado = URLEncoder.encode(titulo, StandardCharsets.UTF_8);
         String json = consumo.obterDados(ENDERECO + tituloCodificado);
 
@@ -47,6 +47,7 @@ public class LivroService {
                 ? resposta.results()
                 : Collections.emptyList();
     }
+
 
     /* ================= SALVAR LIVRO ================= */
 
@@ -113,19 +114,14 @@ public class LivroService {
         if (dados.autores() != null) {
             for (var dadosAutor : dados.autores()) {
 
+                String nomeFormatado = Autor.formatarNomeAutor(dadosAutor.nome());
                 Autor autor = autorRepository
                         .findByNomeAndAnoNascimentoAndAnoFalecimento(
-                                dadosAutor.nome(),
+                                nomeFormatado,
                                 dadosAutor.anoNascimento(),
                                 dadosAutor.anoFalecimento()
                         )
-                        .orElseGet(() -> {
-                            Autor novo = new Autor();
-                            novo.setNome(dadosAutor.nome());
-                            novo.setAnoNascimento(dadosAutor.anoNascimento());
-                            novo.setAnoFalecimento(dadosAutor.anoFalecimento());
-                            return novo;
-                        });
+                        .orElseGet(() -> new Autor(dadosAutor));
 
                 autor.getLivros().add(livro);
                 autores.add(autor);

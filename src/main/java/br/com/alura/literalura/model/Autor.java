@@ -20,7 +20,6 @@ public class Autor {
     private Integer anoNascimento;
     private Integer anoFalecimento;
 
-    // Relacionamento com Livro
     @ManyToMany(mappedBy = "autores", fetch = FetchType.EAGER)
     private Set<Livro> livros = new HashSet<>();
 
@@ -33,18 +32,18 @@ public class Autor {
         this.anoFalecimento = dadosAutor.anoFalecimento();
     }
 
-    private String formatarNomeAutor(String nome) {
+    /* ================= FORMATAR NOME DO AUTOR================= */
+
+    public static String formatarNomeAutor (String nome) {
         if (nome != null && nome.contains(",")) {
-            String[] partes = nome.split(",");
+            String[] partes = nome.split(",", 2);
             return partes[1].trim() + " " + partes[0].trim();
         }
         return nome;
-    }
 
+    };
 
-    // getters e setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    /* ================= GETTERS E SETTERS ================= */
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
@@ -57,10 +56,6 @@ public class Autor {
 
     public Set<Livro> getLivros() {
         return livros;
-    }
-
-    public void setLivros(Set<Livro> livros) {
-        this.livros = livros;
     }
 
 

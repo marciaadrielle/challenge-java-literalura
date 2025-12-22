@@ -34,7 +34,7 @@ public class Livro {
     public Livro() {
     }
 
-    /* ===== getters e setters ===== */
+    /* ================= GETTERS E SETTERS ================= */
 
     public Long getIdGutendex() {
         return idGutendex;

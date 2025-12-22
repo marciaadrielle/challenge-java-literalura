@@ -3,6 +3,7 @@ package br.com.alura.literalura.principal;
 import br.com.alura.literalura.model.*;
 import br.com.alura.literalura.model.dto.DadosAutor;
 import br.com.alura.literalura.model.dto.DadosLivro;
+import br.com.alura.literalura.repository.LivroRepository;
 import br.com.alura.literalura.service.LivroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,11 +14,15 @@ import java.util.stream.Collectors;
 @Component
 public class Principal {
 
+
+    /* ================= SCANNER  ================= */
     private Scanner leitura = new Scanner(System.in);
     @Autowired
     private LivroService livroService;
-
     private List<DadosLivro> livrosBuscados = new ArrayList<>();
+
+
+    /* ================= MENU PRINCIPAL ================= */
 
     public void exibeMenu() {
         var opcao = -1;
@@ -66,11 +71,13 @@ public class Principal {
         }
     }
 
+    /* ================= BUSCAR LIVROS NA API ================= */
+
     private void buscarLivroPorTitulo() {
         System.out.println("Digite o nome do livro:");
         String titulo = leitura.nextLine();
 
-        List<DadosLivro> resultados = livroService.buscarLivros(titulo);
+        List<DadosLivro> resultados = livroService.buscarLivrosPorTitulo(titulo);
 
         if (resultados.isEmpty()) {
             System.out.println("Livro não encontrado.");
@@ -90,6 +97,7 @@ public class Principal {
                             d.id(), d.titulo(), autores);
                 });
 
+
         System.out.println("Digite o ID do livro para salvar:");
         long id = leitura.nextLong();
         leitura.nextLine();
@@ -97,7 +105,7 @@ public class Principal {
         livroService.salvarLivroPorId(id, resultados);
     }
 
-
+    /* ================= LISTAR LIVROS REGISTRADOS NO BANCO ================= */
     private void listarLivrosRegistrados() {
         List<Livro> livros = livroService.listarLivrosRegistrados();
 
@@ -113,7 +121,7 @@ public class Principal {
                     .map(Autor::getNome)
                     .collect(Collectors.joining(", "));
 
-            System.out.printf("- %s | Autores: %s | Idioma: %s | Downloads: %d%n",
+            System.out.printf(" Livro:  %s%n Autor: %s%n Idioma: %s%n Downloads: %d%n ==================================%n",
                     l.getTitulo(),
                     autores,
                     l.getIdioma().getDescricao(),
@@ -122,7 +130,7 @@ public class Principal {
     }
 
 
-
+    /* ================= LISTAR AUTORES REGISTRADOS NO BANCO ================= */
     private void listarAutoresRegistrados() {
         List<Autor> autores = livroService.listarAutoresRegistrados();
 
@@ -133,7 +141,7 @@ public class Principal {
 
         autores.forEach(a -> {
             System.out.printf(
-                    "%n- %s | Nascimento: %s | Falecimento: %s%n",
+                    "%n Autor: %s%n Data de nascimento: %s%n Data de falecimento: %s%n ",
                     a.getNome(),
                     a.getAnoNascimento() != null ? a.getAnoNascimento() : "Desconhecido",
                     a.getAnoFalecimento() != null ? a.getAnoFalecimento() : "Ainda vivo"
@@ -146,9 +154,16 @@ public class Principal {
                 a.getLivros().forEach(l ->
                         System.out.println("   • " + l.getTitulo())
                 );
+
+                System.out.println("==================================");
+
             }
         });
+
+
     }
+
+    /* ================= LISTAR AUTORES VIVOS EM DETERMINADO ANO ================= */
 
 
     private void listarAutoresVivosAno() {
@@ -164,7 +179,7 @@ public class Principal {
         }
 
         vivos.forEach(a -> System.out.printf(
-                "- %s (Nascimento: %s, Falecimento: %s)%n",
+                "Nome: %s (Nascimento: %s, Falecimento: %s)%n",
                 a.getNome(),
                 a.getAnoNascimento(),
                 a.getAnoFalecimento() != null ? a.getAnoFalecimento() : "Ainda vivo"
@@ -172,7 +187,7 @@ public class Principal {
     }
 
 
-
+    /* ================= BUSCAR LIVROS POR IDIOMA ================= */
     private void buscarLivrosPorIdioma() {
         System.out.println("Digite o idioma (en, pt, fr, es): ");
         String sigla = leitura.nextLine();
@@ -199,7 +214,7 @@ public class Principal {
                     .map(Autor::getNome)
                     .collect(Collectors.joining(", "));
 
-            System.out.printf("- %s | Autores: %s | Downloads: %d%n",
+            System.out.printf("- %s%n | Autores: %s%n | Downloads: %d%n",
                     l.getTitulo(),
                     autores,
                     l.getDownloads() != null ? l.getDownloads() : 0);
